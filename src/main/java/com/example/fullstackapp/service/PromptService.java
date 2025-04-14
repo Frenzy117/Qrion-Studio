@@ -58,7 +58,7 @@ public class PromptService {
             }
             case "mistral":
             {
-                String response = handleMistral(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction());
+                String response = handleMistral(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
                 .get(0)
@@ -244,22 +244,43 @@ public class PromptService {
         return sendGroqHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }
     
-    private String handleMistral(AIModel model, String prompt, String systemInstruction) throws Exception
+    private String handleMistral(AIModel model, String prompt, String systemInstruction, String context) throws Exception
     {
-        String body = 
-        """
-            {
-                "model": "mistral-large-latest",
-                "messages": 
-                [
-                    {
-                        "role": "user",
-                        "content": "%s. %s"
-                    }
-                ]
-            }
-        """;
-        String finalBody = String.format(body,systemInstruction,prompt);
+        String finalBody = "";
+        if (context == null || context.isEmpty())
+        {
+            String body = 
+            """
+                {
+                    "model": "mistral-large-latest",
+                    "messages": 
+                    [
+                        {
+                            "role": "user",
+                            "content": "%s. %s"
+                        }
+                    ]
+                }
+            """;
+            finalBody = String.format(body,systemInstruction,prompt);
+        }
+        else
+        {
+            String body = 
+            """
+                {
+                    "model": "mistral-large-latest",
+                    "messages": 
+                    [
+                        {
+                            "role": "user",
+                            "content": "%s. [Context]: %s. [Prompt]: %s"
+                        }
+                    ]
+                }
+            """;
+            finalBody = String.format(body,systemInstruction,context, prompt);
+        }
         return sendAuthHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }
 
