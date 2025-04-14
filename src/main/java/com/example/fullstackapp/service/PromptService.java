@@ -47,7 +47,7 @@ public class PromptService {
             }
             case "groq":
             {
-                String response = handleGroq(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction());
+                String response = handleGroq(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
                 .get(0)
@@ -184,9 +184,39 @@ public class PromptService {
         return sendHttpReq(url, finalBody);
     }
     
-    private String handleGroq(AIModel model, String prompt, String systemInstruction) throws Exception
+    private String handleGroq(AIModel model, String prompt, String systemInstruction, String context) throws Exception
     {
-        String body = 
+        String finalBody = "";
+        if (context == null || context.isEmpty())
+        {
+            String body = 
+            """
+            {
+                "model": "llama-3.1-8b-instant",
+                "messages": 
+                [
+                    {
+                        "role": "user",
+                        "content": "%s"
+                    },
+                    {
+                        "role": "system",
+                        "content": "%s"
+                    }
+                ],
+                
+                "temperature": 0.6,
+                "max_completion_tokens": 4096,
+                "top_p": 0.95,
+                "stream": false,
+                "stop": null
+            }
+            """;
+        finalBody = String.format(body,prompt, systemInstruction);
+        }
+        else
+        {
+            String body = 
         """
         {
             "model": "llama-3.1-8b-instant",
@@ -194,7 +224,7 @@ public class PromptService {
             [
                 {
                     "role": "user",
-                    "content": "%s"
+                    "content": "[Context]: %s. [Prompt]: %s"
                 },
                 {
                     "role": "system",
@@ -209,7 +239,8 @@ public class PromptService {
             "stop": null
         }
         """;
-        String finalBody = String.format(body,prompt, systemInstruction);
+            finalBody = String.format(body,context, prompt, systemInstruction);
+        }
         return sendGroqHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }
     
