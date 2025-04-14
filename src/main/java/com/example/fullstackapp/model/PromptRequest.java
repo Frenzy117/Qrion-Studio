@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class PromptRequest {
     private String modelName;
     private String systemInstruction;
+    private String conversationalContext;
     private String prompt;
 }

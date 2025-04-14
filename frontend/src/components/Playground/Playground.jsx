@@ -13,6 +13,7 @@ const Playground = () => {
   const [chosenModel, setChosenModel] = useState("");
   const [prompt, setPrompt] = useState("");
   const [systemInstruction, setSystemInstruction] = useState("");
+  const [context, setContext] = useState("");
   const [recentPrompts, setRecentPrompts] = useState([
     "How to implement a chat application with React?",
     "Create a tutorial for building a REST API with Node.js",
@@ -52,6 +53,7 @@ const Playground = () => {
     setPrompt(e.target.value);
   };
   const handleInstructionChange = (e) => setSystemInstruction(e.target.value);
+  const handleContextChange = (e) => setContext(e.target.value);
   const handleTemplateChange = (e) => {
     const value = e.target.value;
     setTemplate(value);
@@ -61,6 +63,7 @@ const Playground = () => {
     const request = {
       modelName: chosenModel,
       systemInstruction: systemInstruction,
+      conversationalContext: context,
       prompt: prompt
     };
     
@@ -166,7 +169,6 @@ const Playground = () => {
 
             <div className="bg-[#1A1A1A] rounded-lg py-4 my-2.5 ">
               <h3 className="text-[#F8F8F8] font-medium my-1.5 text-sm font-sans">System Instructions </h3>
-              <div>
                 <TextareaAutosize
                   placeholder='Provide instructions to your model here...'
                   onChange={handleInstructionChange}
@@ -185,17 +187,21 @@ const Playground = () => {
                 <div className="flex gap-2 my-1">
                   <button id="sendToChat" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans">Send to Chat</button>
                   <button id="clearPrompt" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans" onClick={(e) => {setSystemInstruction("")}}>Clear</button>
-                </div>
               </div>
             </div>
               
             <div className="bg-[#1A1A1A] rounded-lg py-4 my-2.5 ">
-              <h3 className="text-[#F8F8F8] font-medium mb-3 text-sm font-sans">Conversation Context</h3>
-              <div className="bg-[#202020] rounded-lg p-4 shadow-sm">
-                <textarea id="contextBuilder" className="bg-[#202020] w-full h-20 p-3  text-[#F8F8F8] outline-none border-[#1A1A1A] min-h-3 rounded resize-y text-sm mb-2 font-sans" placeholder="Set your conversation context here"></textarea>
-              </div>
+              <h3 className="text-[#F8F8F8] font-medium my-1.5 text-sm font-sans">Conversation Context</h3>
+                <TextareaAutosize
+                  placeholder='Set your conversation context here...'
+                  onChange={handleContextChange}
+                  value={context}
+                  maxRows={15}
+                  minRows={5}
+                  style={{ height: "25px" }}
+                  className='w-full outline-none backdrop-blur-lg p-3 rounded-lg placeholder-gray placeholder-opacity- caret-[#3ABEFF] font-sans text-white bg-[#202020] resize-none'
+                />
               <div className="flex gap-2 my-1">
-                <button className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm mt-2 font-sans">Apply Context</button>
               </div>
             </div>
 
