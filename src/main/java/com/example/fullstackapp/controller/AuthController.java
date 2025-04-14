@@ -8,7 +8,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000") // For frontend connection
+@CrossOrigin(origins = "http://localhost:5173") // For frontend connection
 public class AuthController {
 
     private final UserService userService;

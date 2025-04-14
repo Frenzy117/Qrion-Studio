@@ -57,7 +57,7 @@ public class PromptService {
             }
             case "mistral":
             {
-                String response = handleMistral(model, promptRequest.getPrompt());
+                String response = handleMistral(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
                 .get(0)
@@ -155,7 +155,7 @@ public class PromptService {
         return sendGroqHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }
     
-    private String handleMistral(AIModel model, String prompt) throws Exception
+    private String handleMistral(AIModel model, String prompt, String systemInstruction) throws Exception
     {
         String body = 
         """
@@ -165,12 +165,12 @@ public class PromptService {
                 [
                     {
                         "role": "user",
-                        "content": "%s"
+                        "content": "%s. %s"
                     }
                 ]
             }
         """;
-        String finalBody = String.format(body,prompt);
+        String finalBody = String.format(body,systemInstruction,prompt);
         return sendAuthHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }
 
