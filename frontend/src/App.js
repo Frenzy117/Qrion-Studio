@@ -1,15 +1,20 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import './App.css';
+import Register from './components/Register/Register';
+import Home from './components/Home/Home';
+import { Routes, Route } from 'react-router-dom';
+import Login from './components/Login/Login';
 import Playground from './components/Playground/Playground';
-import './styles/App.css';
 
-const App = () => {
+function App() {
   return (
-    <Router>
-      <Switch>
-        <Route path="/" exact component={Playground} />
-      </Switch>
-    </Router>
+    <>
+      <Routes>
+        <Route index path="/home" element={<Home/>}/>
+        <Route path="/playground" element={<Playground/>}/>
+        <Route path="/register" element={<Register />} />
+        <Route path='/login' element={<Login/>}/>
+      </Routes>
+    </>
   );
 }
 
