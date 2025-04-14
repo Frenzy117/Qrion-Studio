@@ -46,7 +46,7 @@ public class PromptService {
             }
             case "groq":
             {
-                String response = handleGroq(model, promptRequest.getPrompt());
+                String response = handleGroq(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
                 .get(0)
@@ -126,7 +126,7 @@ public class PromptService {
         return sendHttpReq(url, finalBody);
     }
     
-    private String handleGroq(AIModel model, String prompt) throws Exception
+    private String handleGroq(AIModel model, String prompt, String systemInstruction) throws Exception
     {
         String body = 
         """
@@ -136,6 +136,10 @@ public class PromptService {
             [
                 {
                     "role": "user",
+                    "content": "%s"
+                },
+                {
+                    "role": "system",
                     "content": "%s"
                 }
             ],
@@ -147,7 +151,7 @@ public class PromptService {
             "stop": null
         }
         """;
-        String finalBody = String.format(body,prompt);
+        String finalBody = String.format(body,prompt, systemInstruction);
         return sendGroqHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }
     
