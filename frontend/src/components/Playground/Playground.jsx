@@ -113,7 +113,7 @@ const Playground = () => {
                 <InputLabel id="model-select-label" className="block text-white text-sm font-medium mb-2" sx={{ fontFamily: 'satoshi', color: "#F8F8F8" }}>
                   Choose Your Model
                 </InputLabel>
-                <Select variant='filled' value={chosenModel} onChange={handleChange} labelId="model-select-label" label="Choose Your Model" sx={{ borderRadius: "0.75em", color: "#F8F8F8", backgroundColor: "#202020", fontFamily: "satoshi" }}>
+                <Select  value={chosenModel} onChange={handleChange} labelId="model-select-label" label="Choose Your Model" sx={{ borderRadius: "0.75em", color: "#F8F8F8", backgroundColor: "#202020", fontFamily: "satoshi" }}>
                   {models.map((model, index) => {
                     return <MenuItem key={index} value={model} dense={true} sx={{ paddingTop: "0", background: "inherit", fontFamily: "satoshi" }}>
                       {model}
