@@ -147,8 +147,8 @@ const Playground = () => {
         <Panel className="h-full flex flex-col bg-[#1A1A1A] rounded-xl p-2 m-2">
           <div className="bg-[#202020] text-white px-5 py-4 font-medium font-sans rounded-xl">Playground</div>
           <div className="flex-1 p-5 overflow-y-auto">
-            <div className="bg-[#1A1A1A] rounded-lg p-4 mb-5 shadow-sm">
-              <h3 className="text-[#F8F8F8] font-medium mb-3 text-sm font-sans">Prompt Templates</h3>
+            <div className="bg-[#1A1A1A] rounded-lg py-4 my-2.5">
+              <h3 className="text-[#F8F8F8] font-medium my-1.5 text-sm font-sans">Prompt Templates</h3>
               <FormControl fullWidth>
                 <InputLabel id="template-select-label" className="block text-sm font-medium mb-2 font-sans" sx={{ color: "#F8F8F8", fontFamily: 'satoshi' }}>
                   Choose Your Template
@@ -164,8 +164,8 @@ const Playground = () => {
               </FormControl>
             </div>
 
-            <div className="bg-[#1A1A1A] rounded-lg p-4 mb-5 shadow-sm">
-              <h3 className="text-[#F8F8F8] font-medium mb-3 text-sm font-sans">System Instructions </h3>
+            <div className="bg-[#1A1A1A] rounded-lg py-4 my-2.5 ">
+              <h3 className="text-[#F8F8F8] font-medium my-1.5 text-sm font-sans">System Instructions </h3>
               <div>
                 <TextareaAutosize
                   placeholder='Provide instructions to your model here...'
@@ -174,34 +174,39 @@ const Playground = () => {
                   maxRows={15}
                   minRows={5}
                   style={{ height: "25px" }}
-                  className='w-full outline-none backdrop-blur-lg p-3 rounded-lg placeholder-gray placeholder-opacity- caret-[#3ABEFF] font-sans text-white bg-[#202020] resize-none'
+                  className='w-full outline-none backdrop-blur-lg p-3 shadow-sm rounded-lg placeholder-gray placeholder-opacity- caret-[#3ABEFF] font-sans text-white bg-[#202020] resize-none'
                 />
-                {chosenModel.includes('mistral-large-largest') && (
-                  <div className="mt-2">
-                    <h3 className="text-[#F8F8F8] font-sans">Warning</h3>
-                    Mistral models are not fine-tuned for instruction following. Your system instruction will therefore be prepended to the prompt.
-                  </div>
+                {chosenModel.includes('mistral') && (
+                  <Alert sx={{backgroundColor: "#1A1A1A", color: "amber"}} className="my-2 border text-[#F8F8F8] font-sans" severity="warning">
+                    <AlertTitle className=" font-sans">Warning</AlertTitle>
+                    {chosenModel} is not fine-tuned for instruction following. Your system instruction will therefore be prepended to the prompt.
+                  </Alert>
                 )}
-                <div className="flex gap-2 ">
+                <div className="flex gap-2 my-1">
                   <button id="sendToChat" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans">Send to Chat</button>
-                  <button id="savePrompt" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans">Save Prompt</button>
-                  <button id="clearPrompt" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans">Clear</button>
+                  <button id="clearPrompt" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans" onClick={(e) => {setSystemInstruction("")}}>Clear</button>
                 </div>
               </div>
             </div>
-
-            <div className="bg-[#202020] rounded-lg p-4 mb-5 shadow-sm">
+              
+            <div className="bg-[#1A1A1A] rounded-lg py-4 my-2.5 ">
               <h3 className="text-[#F8F8F8] font-medium mb-3 text-sm font-sans">Conversation Context</h3>
-              <textarea id="contextBuilder" className="bg-[#202020] w-full h-20 p-3 border border-[#1A1A1A] min-h-3 rounded resize-y text-sm mb-2 font-sans" placeholder="Set your conversation context heresfdzsz"></textarea>
-              <button className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm mt-2 font-sans">Apply Context</button>
+              <div className="bg-[#202020] rounded-lg p-4 shadow-sm">
+                <textarea id="contextBuilder" className="bg-[#202020] w-full h-20 p-3  text-[#F8F8F8] outline-none border-[#1A1A1A] min-h-3 rounded resize-y text-sm mb-2 font-sans" placeholder="Set your conversation context here"></textarea>
+              </div>
+              <div className="flex gap-2 my-1">
+                <button className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm mt-2 font-sans">Apply Context</button>
+              </div>
             </div>
 
-            <div className="bg-[#202020] rounded-lg p-4 mb-5 shadow-sm">
+            <div className="bg-[#1A1A1A] rounded-lg py-4 my-2.5 ">
               <h3 className="text-[#F8F8F8] font-medium mb-3 text-sm font-sans">Recent Prompts</h3>
-              <div className="max-h-48 overflow-y-auto">
-                {recentPrompts.map((recentPrompt, index) => {
-                  return <option className="history-item py-2 px-2 border-b border-[#3ABEFF] cursor-pointer text-sm text-[#A0A0A0] font-sans hover:bg-[#232323]" onClick={handlePromptChange} value={recentPrompt}>{recentPrompt}</option>
-                })}
+              <div className="bg-[#202020] rounded-lg p-4 shadow-sm">
+                <div className="max-h-48 overflow-y-auto">
+                  {recentPrompts.map((recentPrompt, index) => {
+                    return <option className="history-item py-2 px-2 border-b border-[#3ABEFF] cursor-pointer text-sm text-[#A0A0A0] font-sans hover:bg-[#232323]" onClick={handlePromptChange} value={recentPrompt}>{recentPrompt}</option>
+                  })}
+                </div>
               </div>
             </div>
           </div>
