@@ -34,7 +34,13 @@ public class PromptService {
         {
             case "google":
             {
-                String response = handleGemini(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext(), promptRequest.getTemperature(), promptRequest.getTopP());
+                String response = handleGemini(model, 
+                promptRequest.getPrompt(), 
+                promptRequest.getSystemInstruction(), 
+                promptRequest.getConversationalContext(), 
+                promptRequest.getTemperature(), 
+                promptRequest.getTopP(),
+                promptRequest.getMaxTokens());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("candidates")
                     .get(0)
@@ -53,7 +59,8 @@ public class PromptService {
                     promptRequest.getSystemInstruction(), 
                     promptRequest.getConversationalContext(),
                     promptRequest.getTopP(),
-                    promptRequest.getTemperature()
+                    promptRequest.getTemperature(),
+                    promptRequest.getMaxTokens()
                 );
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
@@ -65,7 +72,13 @@ public class PromptService {
             }
             case "mistral":
             {
-                String response = handleMistral(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext(), promptRequest.getTopP(), promptRequest.getTemperature());
+                String response = handleMistral(model, 
+                promptRequest.getPrompt(), 
+                promptRequest.getSystemInstruction(), 
+                promptRequest.getConversationalContext(), 
+                promptRequest.getTopP(), 
+                promptRequest.getTemperature(),
+                promptRequest.getMaxTokens());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
                 .get(0)
@@ -78,227 +91,249 @@ public class PromptService {
                 throw new RuntimeException("Model provider not supported.");
         }
     }
-    private String handleGemini(AIModel model, String prompt, String systemInstruction, String context, float temperature, float topP) throws Exception
-    {
-        String finalBody = "";
-        if (context == null || context.isEmpty())
-        {
-            String body = 
-        """
-        {
-            "contents": 
-            [
-                {
-                    "role": "user",
-                    "parts": 
-                    [
-                        {
-                            "text": "%s"
-                        },
-                    ]
-                },
-            ],
-            "systemInstruction": 
-            {
-                "parts": 
-                [
-                    {
-                        "text": "%s"
-                    },
-                ]
-            },
-            "generationConfig": 
-            {
-                "temperature": %f,
-                "topP": %f,
-                "responseMimeType": "text/plain"
-            },
-            "safetySettings": 
-            [
-                {
-                    "category": "HARM_CATEGORY_HARASSMENT",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_HATE_SPEECH",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-            ],
-        }
-        """;
-        finalBody = String.format(body,prompt, systemInstruction, temperature, topP);
-        }
-        else
-        {
-            String body = 
-        """
-        {
-            "contents": 
-            [
-                {
-                    "role": "user",
-                    "parts": 
-                    [
-                        {
-                            "text": "[Context]: %s. [Prompt]: %s"
-                        },
-                    ]
-                },
-            ],
-            "systemInstruction": 
-            {
-                "parts": 
-                [
-                    {
-                        "text": "%s"
-                    },
-                ]
-            },
-            "generationConfig": 
-            {
-                "temperature": %f,
-                "topP": %f,
-                "responseMimeType": "text/plain"
-            },
-            "safetySettings": 
-            [
-                {
-                    "category": "HARM_CATEGORY_HARASSMENT",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_HATE_SPEECH",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    "threshold": "BLOCK_LOW_AND_ABOVE"
-                },
-            ],
-        }
-        """;
-        finalBody = String.format(body,context, prompt, systemInstruction, temperature, topP);
-        }
-        String url = model.getApiUrl() + "?key=" + model.getAuthKey();
-        return sendHttpReq(url, finalBody);
-    }
+
+    /**
+     * Handles the Gemini API request.
+     * @param model The AI model to use.
+     * @param prompt The prompt to send to the model.
+     * @param systemInstruction The system instruction to send to the model.
+     * @param context The conversational context to send to the model.
+     * @param topP The top P value for sampling.
+     * @param temperature The temperature for sampling.
+     * @param maxTokens The maximum number of tokens to generate.
+     * @return The response from the Gemini API.
+     */
+    private String handleGemini(AIModel model, 
+    String prompt, 
+    String systemInstruction, 
+    String context, 
+    float temperature, 
+    float topP,
+    int maxTokens) throws Exception
+   {
+      String contents;
     
-    private String handleGroq(AIModel model, String prompt, String systemInstruction, String context,float topP, float temperature) throws Exception
-    {
-        String finalBody = "";
-        if (context == null || context.isEmpty())
-        {
-            String body = 
-            """
+      if (context == null || context.isEmpty()) {
+         contents = String.format("""
+               [
+                  {
+                     "role": "user",
+                     "parts": [
+                           {
+                              "text": "%s"
+                           }
+                     ]
+                  }
+               ]
+               """, prompt);
+      } else {
+         contents = String.format("""
+               [
+                  {
+                     "role": "user",
+                     "parts": [
+                           {
+                              "text": "[Context]: %s. [Prompt]: %s"
+                           }
+                     ]
+                  }
+               ]
+               """, context, prompt);
+      }
+
+      String systemInstrBlock = "";
+      if (systemInstruction != null && !systemInstruction.isEmpty()) {
+         systemInstrBlock = String.format("""
+               ,"systemInstruction": {
+                  "parts": [
+                     {
+                           "text": "%s"
+                     }
+                  ]
+               }
+               """, systemInstruction);
+      }
+
+      String finalBody = String.format("""
+         {
+               "contents": %s%s,
+               "generationConfig": {
+                  "temperature": %f,
+                  "topP": %f,
+                  "maxOutputTokens": %d,
+                  "responseMimeType": "text/plain"
+               },
+               "safetySettings": [
+                  {
+                     "category": "HARM_CATEGORY_HARASSMENT",
+                     "threshold": "BLOCK_LOW_AND_ABOVE"
+                  },
+                  {
+                     "category": "HARM_CATEGORY_HATE_SPEECH",
+                     "threshold": "BLOCK_LOW_AND_ABOVE"
+                  },
+                  {
+                     "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                     "threshold": "BLOCK_LOW_AND_ABOVE"
+                  },
+                  {
+                     "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                     "threshold": "BLOCK_LOW_AND_ABOVE"
+                  }
+               ]
+         }
+         """, contents, systemInstrBlock, temperature, topP, maxTokens);
+
+      String url = model.getApiUrl() + "?key=" + model.getAuthKey();
+      return sendHttpReq(url, finalBody);
+}
+
+
+   /**
+    * Handles the Groq API request.
+    * @param model The AI model to use.
+    * @param prompt The prompt to send to the model.
+    * @param systemInstruction The system instruction to send to the model.
+    * @param context The conversational context to send to the model.
+    * @param topP The top P value for sampling.
+    * @param temperature The temperature for sampling.
+    * @param maxTokens The maximum number of tokens to generate.
+    * @return The response from the Groq API.
+    */
+   private String handleGroq(AIModel model, 
+    String prompt, 
+    String systemInstruction, 
+    String context,
+    float topP, 
+    float temperature,
+    int maxTokens) throws Exception
+   {
+      String messages;
+    
+      if (systemInstruction == null || systemInstruction.isEmpty()) {
+         if (context == null || context.isEmpty()) {
+               messages = String.format("""
+                  [
+                     {
+                           "role": "user",
+                           "content": "%s"
+                     }
+                  ]
+                  """, prompt);
+         } else {
+               messages = String.format("""
+                  [
+                     {
+                           "role": "user",
+                           "content": "[Context]: %s. [Prompt]: %s"
+                     }
+                  ]
+                  """, context, prompt);
+         }
+      } else {
+         if (context == null || context.isEmpty()) {
+               messages = String.format("""
+                  [
+                     {
+                           "role": "system",
+                           "content": "%s"
+                     },
+                     {
+                           "role": "user",
+                           "content": "%s"
+                     }
+                  ]
+                  """, systemInstruction, prompt);
+         } else {
+               messages = String.format("""
+                  [
+                     {
+                           "role": "system",
+                           "content": "%s"
+                     },
+                     {
+                           "role": "user",
+                           "content": "[Context]: %s. [Prompt]: %s"
+                     }
+                  ]
+                  """, systemInstruction, context, prompt);
+         }
+      }
+
+      String finalBody = String.format("""
+         {
+               "model": "llama-3.1-8b-instant",
+               "messages": %s,
+               "temperature": %f,
+               "top_p": %f,
+               "max_completion_tokens": %d,
+               "stream": false,
+               "stop": null
+         }
+         """, messages, temperature, topP, maxTokens);
+
+      return sendGroqHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
+}
+
+   /**
+   * Handles the Mistral API request.
+   * @param model The AI model to use.
+   * @param prompt The prompt to send to the model.
+   * @param systemInstruction The system instruction to send to the model.
+   * @param context The conversational context to send to the model.
+   * @param topP The top P value for sampling.
+   * @param temperature The temperature for sampling.
+   * @param maxTokens The maximum number of tokens to generate.
+   * @return The response from the Mistral API.
+   */
+   private String handleMistral(AIModel model, 
+   String prompt, 
+   String systemInstruction, 
+   String context, 
+   float topP, 
+   float temperature, 
+   int maxTokens) throws Exception
+   {
+      String userContent;
+
+      if ((systemInstruction == null || systemInstruction.isEmpty()) &&
+            (context == null || context.isEmpty())) {
+            userContent = prompt;
+      } else if (systemInstruction != null && !systemInstruction.isEmpty() &&
+               (context == null || context.isEmpty())) {
+            userContent = systemInstruction + ". " + prompt;
+      } else if ((systemInstruction == null || systemInstruction.isEmpty()) &&
+               context != null && !context.isEmpty()) {
+            userContent = "[Context]: " + context + ". [Prompt]: " + prompt;
+      } else {
+            userContent = systemInstruction + ". [Context]: " + context + ". [Prompt]: " + prompt;
+      }
+
+      String finalBody = String.format("""
             {
-                "model": "llama-3.1-8b-instant",
-                "messages": 
-                [
-                    {
+               "model": "mistral-large-latest",
+               "messages": [
+                  {
                         "role": "user",
                         "content": "%s"
-                    },
-                    {
-                        "role": "system",
-                        "content": "%s"
-                    }
-                ],
-                
-                "temperature": %f,
-                "max_completion_tokens": 4096,
-                "top_p": %f,
-                "stream": false,
-                "stop": null
+                  }
+               ],
+               "temperature": %f,
+               "top_p": %f,
+               "max_tokens": %d
             }
-            """;
-        finalBody = String.format(body,prompt, systemInstruction, temperature, topP);
-        }
-        else
-        {
-            String body = 
-        """
-        {
-            "model": "llama-3.1-8b-instant",
-            "messages": 
-            [
-                {
-                    "role": "user",
-                    "content": "[Context]: %s. [Prompt]: %s"
-                },
-                {
-                    "role": "system",
-                    "content": "%s"
-                }
-            ],
-            
-            "temperature": %f,
-            "max_completion_tokens": 4096,
-            "top_p": %f,
-            "stream": false,
-            "stop": null
-        }
-        """;
-            finalBody = String.format(body,context, prompt, systemInstruction, temperature, topP);
-        }
-        return sendGroqHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
-    }
-    
-    private String handleMistral(AIModel model, String prompt, String systemInstruction, String context, float topP, float temperature) throws Exception
-    {
-        String finalBody = "";
-        if (context == null || context.isEmpty())
-        {
-            String body = 
-            """
-                {
-                    "model": "mistral-large-latest",
-                    "messages": 
-                    [
-                        {
-                            "role": "user",
-                            "content": "%s. %s"
-                        }
-                    ],
-                    "temperature": %f,
-                    "top_p": %f,
-                }
-            """;
-            finalBody = String.format(body,systemInstruction,prompt, temperature, topP);
-        }
-        else
-        {
-            String body = 
-            """
-                {
-                    "model": "mistral-large-latest",
-                    "messages": 
-                    [
-                        {
-                            "role": "user",
-                            "content": "%s. [Context]: %s. [Prompt]: %s"
-                        }
-                    ],
-                    "temperature": %f,
-                    "top_p": %f,
-                }
-            """;
-            finalBody = String.format(body,systemInstruction,context, prompt, temperature, topP);
-        }
-        return sendAuthHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
-    }
+            """, userContent, temperature, topP, maxTokens);
 
+      return sendAuthHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
+   };
+
+   /**
+   * Sends an HTTP request to the specified URL with the given body.
+   * @param url The URL to send the request to.
+   * @param body The body of the request.
+   * @return The response from the server.
+   * @throws Exception If an error occurs while sending the request.
+   */
     private String sendHttpReq(String url, String body) throws Exception{
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url))
@@ -309,6 +344,14 @@ public class PromptService {
         return response.body();
     }
 
+      /**
+      * Sends an authenticated HTTP request to the specified URL with the given body.
+      * @param url The URL to send the request to.
+      * @param body The body of the request.
+      * @param apiKey The API key for authentication.
+      * @return The response from the server.
+      * @throws Exception If an error occurs while sending the request.
+      */
     private String sendAuthHttpReq(String url, String body, String apiKey) throws Exception{
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url))
@@ -321,6 +364,14 @@ public class PromptService {
         return response.body();
     }
 
+      /**
+      * Sends an authenticated HTTP request to the specified URL with the given body.
+      * @param url The URL to send the request to.
+      * @param body The body of the request.
+      * @param apiKey The API key for authentication.
+      * @return The response from the server.
+      * @throws Exception If an error occurs while sending the request.
+      */
     private String sendGroqHttpReq(String url, String body, String apiKey) throws Exception{
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url))
