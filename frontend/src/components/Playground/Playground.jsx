@@ -6,6 +6,7 @@ import {Alert, AlertTitle} from '@mui/material';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { GoChevronRight } from "react-icons/go";
 import { TextareaAutosize } from '@mui/material';
+import { DragHandleDots2Icon } from '@radix-ui/react-icons';
 import { Link } from 'react-router-dom';
 import {Slider} from '@mui/material';
 import Navbar  from '../ui/navbar.jsx';
@@ -113,10 +114,10 @@ const Playground = () => {
   };
 
   return (
-    <div className="bg-[#121212] h-screen max-h-screen">
+    <div className="bg-[#121212] h-screen max-h-screen box-border">
       <Navbar/>
-      <PanelGroup direction='horizontal' className="bg-[#121212] text-gray-900 flex h-screen overflow-auto">
-        <Panel className="h-screen flex flex-col bg-[#1A1A1A] m-2 rounded-xl p-1">
+      <PanelGroup direction='horizontal' className="bg-[#121212] text-gray-900 h-screen overflow-hidden">
+        <Panel className="h-full flex flex-col bg-[#1A1A1A] m-2 rounded-xl p-1 overflow-auto">
           <div className='overflow-y-auto flex-column h-full justify-between'>
             <div className="relative m-2 flex rounded-xl w-full flex-row justify-center">
               <FormControl sx={{ width: "33.33%" }}>
@@ -132,12 +133,14 @@ const Playground = () => {
                 </Select>
               </FormControl>
             </div>
-            <div id="messagesContainer" className="bg-[#1A1A1A] flex-1 overflow-y-auto h-fit text-[#F8F8F8] rounded-2xl p-4 m-3 mb-2 font-sans">
-              {response && (
-                <Markdown>
-                  {response}
-                </Markdown>
-              )}
+            <div id="messagesContainer" className="bg-[#1A1A1A] flex-1 h-3/4 text-[#F8F8F8] rounded-2xl p-4 m-3 mb-2 font-sans">
+              <div className="h-full flex flex-col gap-2 overflow-y-scroll">
+                {response && (
+                  <Markdown>
+                    {response}
+                  </Markdown>
+                )}
+                </div>
             </div>
             <div className="p-2.5 h-fit min-h-12 m-0.5 outline-none justify-center items-center align-middle flex bg-[#202020] focus:outline-none focus:ring-0 focus:ring-grey focus:ring-opacity-40 resize-none rounded-3xl">
               <TextareaAutosize
@@ -156,10 +159,14 @@ const Playground = () => {
             </div>
           </div>
         </Panel>
-        <PanelResizeHandle />
-        <Panel className="h-full flex flex-col bg-[#1A1A1A] rounded-xl p-2 m-2">
+        <PanelResizeHandle id="resize-handle" className='h-full flex items-center justify-center bg-[#121212]'>
+          <div className='flex z-10 h-6 w-3 items-center justify-center rounded-sm bg-[#202020] hover:bg-[#3ABEFF] active:bg-[#3ABEFF] cursor-pointer'>
+            <DragHandleDots2Icon className='h-6 w-3 text-grey cursor-pointer' />
+          </div>
+        </PanelResizeHandle>
+        <Panel minSize={20} maxSize={50} collapsible={true} className="h-full flex flex-col bg-[#1A1A1A] rounded-xl p-2 m-2">
           <div className="bg-[#202020] text-white px-5 py-4 font-medium font-sans rounded-xl">Playground</div>
-          <div className="flex-1 p-5 overflow-y-auto">
+          <div className="flex-1 p-5 overflow-y-auto overflow-x-auto">
             <div className="bg-[#1A1A1A] rounded-lg py-4 my-2.5">
               <h3 className="text-[#F8F8F8] font-medium my-1.5 text-sm font-sans">Prompt Templates</h3>
               <FormControl fullWidth>
