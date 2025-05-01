@@ -14,4 +14,5 @@ public class PromptRequest {
     private String prompt;
     private float topP;
     private float temperature;
+    private int maxTokens;
 }
