@@ -87,8 +87,8 @@ const Playground = () => {
       systemInstruction: systemInstruction,
       conversationalContext: context,
       prompt: prompt,
-      topP: 0.9,
-      temperature: 0.7,
+      topP: topP,
+      temperature: temperature,
     };
     
     try {
