@@ -34,7 +34,7 @@ public class PromptService {
         {
             case "google":
             {
-                String response = handleGemini(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext());
+                String response = handleGemini(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext(), promptRequest.getTemperature(), promptRequest.getTopP());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("candidates")
                     .get(0)
@@ -47,7 +47,14 @@ public class PromptService {
             }
             case "groq":
             {
-                String response = handleGroq(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext());
+                String response = handleGroq(
+                    model, 
+                    promptRequest.getPrompt(), 
+                    promptRequest.getSystemInstruction(), 
+                    promptRequest.getConversationalContext(),
+                    promptRequest.getTopP(),
+                    promptRequest.getTemperature()
+                );
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
                 .get(0)
@@ -58,7 +65,7 @@ public class PromptService {
             }
             case "mistral":
             {
-                String response = handleMistral(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext());
+                String response = handleMistral(model, promptRequest.getPrompt(), promptRequest.getSystemInstruction(), promptRequest.getConversationalContext(), promptRequest.getTopP(), promptRequest.getTemperature());
                 JsonNode root = mapper.readTree(response);
                 String responseText = root.path("choices")
                 .get(0)
@@ -71,7 +78,7 @@ public class PromptService {
                 throw new RuntimeException("Model provider not supported.");
         }
     }
-    private String handleGemini(AIModel model, String prompt, String systemInstruction, String context) throws Exception
+    private String handleGemini(AIModel model, String prompt, String systemInstruction, String context, float temperature, float topP) throws Exception
     {
         String finalBody = "";
         if (context == null || context.isEmpty())
@@ -102,6 +109,8 @@ public class PromptService {
             },
             "generationConfig": 
             {
+                "temperature": %f,
+                "topP": %f,
                 "responseMimeType": "text/plain"
             },
             "safetySettings": 
@@ -125,7 +134,7 @@ public class PromptService {
             ],
         }
         """;
-        finalBody = String.format(body,prompt, systemInstruction);
+        finalBody = String.format(body,prompt, systemInstruction, temperature, topP);
         }
         else
         {
@@ -155,6 +164,8 @@ public class PromptService {
             },
             "generationConfig": 
             {
+                "temperature": %f,
+                "topP": %f,
                 "responseMimeType": "text/plain"
             },
             "safetySettings": 
@@ -178,13 +189,13 @@ public class PromptService {
             ],
         }
         """;
-        finalBody = String.format(body,context, prompt, systemInstruction);
+        finalBody = String.format(body,context, prompt, systemInstruction, temperature, topP);
         }
         String url = model.getApiUrl() + "?key=" + model.getAuthKey();
         return sendHttpReq(url, finalBody);
     }
     
-    private String handleGroq(AIModel model, String prompt, String systemInstruction, String context) throws Exception
+    private String handleGroq(AIModel model, String prompt, String systemInstruction, String context,float topP, float temperature) throws Exception
     {
         String finalBody = "";
         if (context == null || context.isEmpty())
@@ -205,14 +216,14 @@ public class PromptService {
                     }
                 ],
                 
-                "temperature": 0.6,
+                "temperature": %f,
                 "max_completion_tokens": 4096,
-                "top_p": 0.95,
+                "top_p": %f,
                 "stream": false,
                 "stop": null
             }
             """;
-        finalBody = String.format(body,prompt, systemInstruction);
+        finalBody = String.format(body,prompt, systemInstruction, temperature, topP);
         }
         else
         {
@@ -232,19 +243,19 @@ public class PromptService {
                 }
             ],
             
-            "temperature": 0.6,
+            "temperature": %f,
             "max_completion_tokens": 4096,
-            "top_p": 0.95,
+            "top_p": %f,
             "stream": false,
             "stop": null
         }
         """;
-            finalBody = String.format(body,context, prompt, systemInstruction);
+            finalBody = String.format(body,context, prompt, systemInstruction, temperature, topP);
         }
         return sendGroqHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }
     
-    private String handleMistral(AIModel model, String prompt, String systemInstruction, String context) throws Exception
+    private String handleMistral(AIModel model, String prompt, String systemInstruction, String context, float topP, float temperature) throws Exception
     {
         String finalBody = "";
         if (context == null || context.isEmpty())
@@ -259,10 +270,12 @@ public class PromptService {
                             "role": "user",
                             "content": "%s. %s"
                         }
-                    ]
+                    ],
+                    "temperature": %f,
+                    "top_p": %f,
                 }
             """;
-            finalBody = String.format(body,systemInstruction,prompt);
+            finalBody = String.format(body,systemInstruction,prompt, temperature, topP);
         }
         else
         {
@@ -276,10 +289,12 @@ public class PromptService {
                             "role": "user",
                             "content": "%s. [Context]: %s. [Prompt]: %s"
                         }
-                    ]
+                    ],
+                    "temperature": %f,
+                    "top_p": %f,
                 }
             """;
-            finalBody = String.format(body,systemInstruction,context, prompt);
+            finalBody = String.format(body,systemInstruction,context, prompt, temperature, topP);
         }
         return sendAuthHttpReq(model.getApiUrl(), finalBody, model.getAuthKey());
     }

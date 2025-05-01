@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { SparklesCore } from "../ui/sparkles.jsx";
 import { Button } from '@mui/material';
+import { hover } from 'motion/react';
 
 const Home = () => {
     let navigate = useNavigate();
@@ -9,13 +10,13 @@ const Home = () => {
       <div className='bg-[#121212] h-screen box-border'>
         <div className=" text-[#F8F8F8] px-6 py-2 flex justify-between items-end relative">
             <div className="flex gap-5">
-              <Button sx={{color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi"}} variant='text'>
-                <Link to={'/playground'}>
+              <Button sx={{color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi", ":hover": {color: "#66D6FF"}}} variant='text'>
+                <Link to={'/playground'} style={{color: "#F8F8F8", ":hover": {color: "#66D6FF"}}}>
                   Playground
                 </Link>
                 </Button>
-              <Button sx={{color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi"}} variant='text'>History</Button>
-              <Button sx={{color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi"}} variant='text'>Settings</Button>
+              <Button sx={{color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi", ":hover": {color: "#66D6FF"}}} variant='text'>History</Button>
+              <Button sx={{color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi", ":hover": {color: "#66D6FF"}}} variant='text'>Settings</Button>
             </div>
             <div className='flex gap-5'>
             <Button sx={{color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi"}} variant='text'>
@@ -32,8 +33,8 @@ const Home = () => {
           </div>
         <div className="bg-[#121212] min-h-screen flex flex-col items-center justify-center">
           
-          <h1 className='text-white text-xl font-extralight'>This is&thinsp;<br/>
-            <span className='text-[#3ABEFF] text-7xl'>Qrion</span>
+          <h1 className='text-white text-xl font-sans'>This is&thinsp;<br/>
+            <span className='text-[#3ABEFF] text-7xl font-sans'>Qrion</span>
             </h1>
             <div className="w-[40rem] h-40 relative">
         {/* Gradients */}

@@ -12,4 +12,6 @@ public class PromptRequest {
     private String systemInstruction;
     private String conversationalContext;
     private String prompt;
+    private float topP;
+    private float temperature;
 }

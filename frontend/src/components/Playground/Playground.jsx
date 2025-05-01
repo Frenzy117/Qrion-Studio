@@ -7,13 +7,25 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { GoChevronRight } from "react-icons/go";
 import { TextareaAutosize } from '@mui/material';
 import { Link } from 'react-router-dom';
+import {Slider} from '@mui/material';
+import Navbar  from '../ui/navbar.jsx';
 
 const Playground = () => {
   const [models, setModels] = useState([]);
+  const [request, setRequest] = useState({
+    modelName: "",
+    systemInstruction: "",
+    conversationalContext: "",
+    prompt: "",
+    topP: 0.9,
+    temperature: 0.7,
+  });
   const [chosenModel, setChosenModel] = useState("");
   const [prompt, setPrompt] = useState("");
   const [systemInstruction, setSystemInstruction] = useState("");
   const [context, setContext] = useState("");
+  const [topP, setTopP] = useState(0.9);
+  const [temperature, setTemperature] = useState(0.7);
   const [recentPrompts, setRecentPrompts] = useState([
     "How to implement a chat application with React?",
     "Create a tutorial for building a REST API with Node.js",
@@ -52,8 +64,18 @@ const Playground = () => {
   const handlePromptChange = (e) => {
     setPrompt(e.target.value);
   };
+
+  const handleParamsChange = (e) => {
+    const value = e.target.value;
+    setRequest({
+      ...request,
+      [e.target.name]: value
+    });
+  }
   const handleInstructionChange = (e) => setSystemInstruction(e.target.value);
   const handleContextChange = (e) => setContext(e.target.value);
+  const handleTopPChange = (e) => setTopP(e.target.value);
+  const handleTemperatureChange = (e) => setTemperature(e.target.value);
   const handleTemplateChange = (e) => {
     const value = e.target.value;
     setTemplate(value);
@@ -64,7 +86,9 @@ const Playground = () => {
       modelName: chosenModel,
       systemInstruction: systemInstruction,
       conversationalContext: context,
-      prompt: prompt
+      prompt: prompt,
+      topP: 0.9,
+      temperature: 0.7,
     };
     
     try {
@@ -84,27 +108,9 @@ const Playground = () => {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // prevent newline
-      handlePromptChange(e);
-    }
-  };
-
   return (
     <div className="bg-[#121212] h-screen max-h-screen">
-      <div className="text-[#F8F8F8] px-6 py-2 flex justify-between items-center relative">
-        <div className="text-3xl font-extralight text-[#3ABEFF] font-sans">
-          <Link to={'/home'}>
-            Qrion
-          </Link>
-        </div>
-        <div className="flex gap-5">
-          <Button sx={{ color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi" }} variant='text'>History</Button>
-          <Button sx={{ color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi" }} variant='text'>Settings</Button>
-          <Button sx={{ color: "#F8F8F8", textTransform: "none", fontFamily: "satoshi" }} variant='text'>Logout</Button>
-        </div>
-      </div>
+      <Navbar/>
       <PanelGroup direction='horizontal' className="bg-[#121212] text-gray-900 flex h-screen overflow-auto">
         <Panel className="h-screen flex flex-col bg-[#1A1A1A] m-2 rounded-xl p-1">
           <div className='overflow-y-auto flex-column h-full justify-between'>
@@ -129,7 +135,7 @@ const Playground = () => {
                 </Markdown>
               )}
             </div>
-            <div className="p-2.5 h-fit min-h-12 m-0.5 outline-none justify-center items-center align-middle flex bg-[#202020] focus:outline-none focus:ring-0 focus:ring-grey focus:ring-opacity-40 shadow-lg resize-none rounded-3xl">
+            <div className="p-2.5 h-fit min-h-12 m-0.5 outline-none justify-center items-center align-middle flex bg-[#202020] focus:outline-none focus:ring-0 focus:ring-grey focus:ring-opacity-40 resize-none rounded-3xl">
               <TextareaAutosize
                 placeholder='Say something...'
                 onChange={handlePromptChange}
@@ -185,7 +191,7 @@ const Playground = () => {
                   </Alert>
                 )}
                 <div className="flex gap-2 my-1">
-                  <button id="sendToChat" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans">Send to Chat</button>
+                  {/* <button id="sendToChat" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans">Send to Chat</button> */}
                   <button id="clearPrompt" className="bg-[#3ABEFF] hover:bg-[#66D6FF] text-[#F8F8F8] px-3 py-2 rounded text-sm font-sans" onClick={(e) => {setSystemInstruction("")}}>Clear</button>
               </div>
             </div>
@@ -212,6 +218,43 @@ const Playground = () => {
                   {recentPrompts.map((recentPrompt, index) => {
                     return <option className="history-item py-2 px-2 border-b border-[#3ABEFF] cursor-pointer text-sm text-[#A0A0A0] font-sans hover:bg-[#232323]" onClick={handlePromptChange} value={recentPrompt}>{recentPrompt}</option>
                   })}
+                </div>
+              </div>
+            </div>
+            <div className='bg-[#1A1A1A] rounded-lg py-4 my-2.5'>
+              <h3 className="text-[#F8F8F8] font-medium mb-3 text-sm font-sans">Model Parameters</h3>
+              <div className="bg-[#202020] rounded-lg p-4 shadow-sm gap-5 flex flex-col">
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <label htmlFor="temperature" className="text-[#F8F8F8] text-sm font-sans">Temperature</label>
+                    <span className="text-[#A0A0A0] text-sm font-sans">{temperature}</span>
+                  </div>
+                  <Slider
+                    id="temperature"
+                    defaultValue={70}
+                    aria-label="Default"
+                    valueLabelDisplay="auto"
+                    onChange={handleTemperatureChange}
+                    step={0.05}
+                    min={0}
+                    max={2}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <label htmlFor="top-p" className="text-[#F8F8F8] text-sm font-sans">Top P</label>
+                    <span className="text-[#A0A0A0] text-sm font-sans">{topP}</span>
+                  </div>
+                  <Slider
+                    id="top-p"
+                    defaultValue={90}
+                    aria-label="Default"
+                    onChange={handleTopPChange}
+                    valueLabelDisplay="auto"
+                    step={0.05}
+                    min={0}
+                    max={1}
+                  />
                 </div>
               </div>
             </div>
