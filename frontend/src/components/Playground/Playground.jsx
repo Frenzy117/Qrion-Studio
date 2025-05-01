@@ -18,14 +18,16 @@ const Playground = () => {
     conversationalContext: "",
     prompt: "",
     topP: 0.9,
-    temperature: 0.7,
+    temperature: 1,
+    maxTokens: 4096,
   });
   const [chosenModel, setChosenModel] = useState("");
   const [prompt, setPrompt] = useState("");
   const [systemInstruction, setSystemInstruction] = useState("");
   const [context, setContext] = useState("");
   const [topP, setTopP] = useState(0.9);
-  const [temperature, setTemperature] = useState(0.7);
+  const [temperature, setTemperature] = useState(1);
+  const [maxTokens, setMaxTokens] = useState(4096);
   const [recentPrompts, setRecentPrompts] = useState([
     "How to implement a chat application with React?",
     "Create a tutorial for building a REST API with Node.js",
@@ -76,6 +78,7 @@ const Playground = () => {
   const handleContextChange = (e) => setContext(e.target.value);
   const handleTopPChange = (e) => setTopP(e.target.value);
   const handleTemperatureChange = (e) => setTemperature(e.target.value);
+  const handleMaxTokensChange = (e) => setMaxTokens(e.target.value);
   const handleTemplateChange = (e) => {
     const value = e.target.value;
     setTemplate(value);
@@ -89,6 +92,7 @@ const Playground = () => {
       prompt: prompt,
       topP: topP,
       temperature: temperature,
+      maxTokens: maxTokens,
     };
     
     try {
@@ -216,7 +220,7 @@ const Playground = () => {
               <div className="bg-[#202020] rounded-lg p-4 shadow-sm">
                 <div className="max-h-48 overflow-y-auto">
                   {recentPrompts.map((recentPrompt, index) => {
-                    return <option className="history-item py-2 px-2 border-b border-[#3ABEFF] cursor-pointer text-sm text-[#A0A0A0] font-sans hover:bg-[#232323]" onClick={handlePromptChange} value={recentPrompt}>{recentPrompt}</option>
+                    return <option key={index} className="history-item py-2 px-2 border-b border-[#3ABEFF] cursor-pointer text-sm text-[#A0A0A0] font-sans hover:bg-[#232323]" onClick={handlePromptChange} value={recentPrompt}>{recentPrompt}</option>
                   })}
                 </div>
               </div>
@@ -231,7 +235,7 @@ const Playground = () => {
                   </div>
                   <Slider
                     id="temperature"
-                    defaultValue={70}
+                    defaultValue={1}
                     aria-label="Default"
                     valueLabelDisplay="auto"
                     onChange={handleTemperatureChange}
@@ -247,13 +251,29 @@ const Playground = () => {
                   </div>
                   <Slider
                     id="top-p"
-                    defaultValue={90}
+                    defaultValue={0.9}
                     aria-label="Default"
                     onChange={handleTopPChange}
                     valueLabelDisplay="auto"
                     step={0.05}
                     min={0}
                     max={1}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <label htmlFor="top-p" className="text-[#F8F8F8] text-sm font-sans">Max Tokens</label>
+                    <span className="text-[#A0A0A0] text-sm font-sans">{maxTokens}</span>
+                  </div>
+                  <Slider
+                    id="maxtokens"
+                    defaultValue={4096}
+                    aria-label="Default"
+                    onChange={handleMaxTokensChange}
+                    valueLabelDisplay="auto"
+                    step={120}
+                    min={1}
+                    max={8000}
                   />
                 </div>
               </div>
