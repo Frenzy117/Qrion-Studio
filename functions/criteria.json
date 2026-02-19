@@ -1,0 +1,40 @@
+{
+  "rubricName": "Qrion Prompt Quality Rubric",
+  "criteria": [
+    {
+      "id": "clarity",
+      "name": "Clarity",
+      "description": "Prompt is easy to read and unambiguous.",
+      "weight": 0.3,
+      "maxScore": 5
+    },
+    {
+      "id": "specificity",
+      "name": "Specificity",
+      "description": "Prompt includes concrete instructions, examples, or constraints.",
+      "weight": 0.2,
+      "maxScore": 5
+    },
+    {
+      "id": "completeness",
+      "name": "Completeness",
+      "description": "Prompt contains all necessary components to generate a good response.",
+      "weight": 0.3,
+      "maxScore": 5
+    },
+    {
+      "id": "conciseness",
+      "name": "Conciseness",
+      "description": "Prompt is brief yet informative, without unnecessary fluff.",
+      "weight": 0.1,
+      "maxScore": 5
+    },
+    {
+      "id": "relevance",
+      "name": "Relevance",
+      "description": "Prompt is closely aligned to its goal or example references.",
+      "weight": 0.1,
+      "maxScore": 5
+    }
+  ]
+}

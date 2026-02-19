@@ -100,7 +100,7 @@ const Playground = () => {
       const res = await fetch("http://localhost:8080/api/prompt", {
         method: "POST",
         headers: {
-          'Access-Control-Allow-Origin': 'http://localhost:3000',
+          'Access-Control-Allow-Origin': 'http://localhost:5173',
           "Content-Type": "application/json",
         },
         body: JSON.stringify(request)
